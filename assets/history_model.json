@@ -1,0 +1,82 @@
+[
+  {
+    "imageLink": "https://crop.kindwise.com/media/images/734e1bde77dc49f7b9f1ff52491f7672.jpg",
+    "description": "A common leaf disease seen during the rainy season.",
+    "name": "Leaf Spot",
+    "scientificName": "Cercospora zeae-maydis",
+    "probability": 0.92,
+    "createdAt": "2025-05-15T10:01:00Z"
+  },
+  {
+    "imageLink": "https://crop.kindwise.com/media/images/734e1bde77dc49f7b9f1ff52491f7672.jpg",
+    "description": "Yellowing of leaves due to nutrient deficiency.",
+    "name": "Nitrogen Deficiency",
+    "scientificName": "Nutrient Deficiency",
+    "probability": 99.9,
+    "createdAt": "2025-05-15T10:02:00Z"
+  },
+  {
+    "imageLink": "https://crop.kindwise.com/media/images/734e1bde77dc49f7b9f1ff52491f7672.jpg",
+    "description": "Early signs of fungal infection on leaves.",
+    "name": "Fungal Blight",
+    "scientificName": "Phytophthora infestans",
+    "probability": 0.85,
+    "createdAt": "2025-05-15T10:03:00Z"
+  },
+  {
+    "imageLink": "https://crop.kindwise.com/media/images/734e1bde77dc49f7b9f1ff52491f7672.jpg",
+    "description": "Leaf curling and wilting.",
+    "name": "Leaf Curl Virus",
+    "scientificName": "Begomovirus",
+    "probability": 0.9,
+    "createdAt": "2025-05-15T10:04:00Z"
+  },
+  {
+    "imageLink": "https://crop.kindwise.com/media/images/734e1bde77dc49f7b9f1ff52491f7672.jpg",
+    "description": "Brown patches with yellow halos.",
+    "name": "Brown Spot",
+    "scientificName": "Bipolaris oryzae",
+    "probability": 0.81,
+    "createdAt": "2025-05-15T10:05:00Z"
+  },
+  {
+    "imageLink": "https://crop.kindwise.com/media/images/734e1bde77dc49f7b9f1ff52491f7672.jpg",
+    "description": "Root damage causing plant stunting.",
+    "name": "Root Rot",
+    "scientificName": "Pythium spp.",
+    "probability": 0.87,
+    "createdAt": "2025-05-15T10:06:00Z"
+  },
+  {
+    "imageLink": "https://crop.kindwise.com/media/images/734e1bde77dc49f7b9f1ff52491f7672.jpg",
+    "description": "Mold-like growth on leaf surface.",
+    "name": "Powdery Mildew",
+    "scientificName": "Erysiphales",
+    "probability": 0.93,
+    "createdAt": "2025-05-15T10:07:00Z"
+  },
+  {
+    "imageLink": "https://crop.kindwise.com/media/images/734e1bde77dc49f7b9f1ff52491f7672.jpg",
+    "description": "White spots indicating early rust infection.",
+    "name": "Common Rust",
+    "scientificName": "Puccinia sorghi",
+    "probability": 0.89,
+    "createdAt": "2025-05-15T10:08:00Z"
+  },
+  {
+    "imageLink": "https://crop.kindwise.com/media/images/734e1bde77dc49f7b9f1ff52491f7672.jpg",
+    "description": "Leaf tearing due to insect feeding.",
+    "name": "Armyworm Damage",
+    "scientificName": "Spodoptera frugiperda",
+    "probability": 0.91,
+    "createdAt": "2025-05-15T10:09:00Z"
+  },
+  {
+    "imageLink": "https://crop.kindwise.com/media/images/734e1bde77dc49f7b9f1ff52491f7672.jpg",
+    "description": "Dry lesions appearing on leaf tips.",
+    "name": "Tip Burn",
+    "scientificName": "Abiotic Stress",
+    "probability": 0.79,
+    "createdAt": "2025-05-15T10:10:00Z"
+  }
+]

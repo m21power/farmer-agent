@@ -1,0 +1,235 @@
+[
+  {
+    "questionId": "q1",
+    "author": "Farmer Ali",
+    "role": "Farmer",
+    "question": "How do I prevent pests during the rainy season?",
+    "createdAt": "2025-05-01T10:00:00Z",
+    "replies": []
+  },
+  {
+    "questionId": "q1",
+    "author": "Farmer Ali",
+    "role": "Farmer",
+    "imageUrl": "https://crop.kindwise.com/media/images/734e1bde77dc49f7b9f1ff52491f7672.jpg",
+    "question": "How do I prevent pests during the rainy season?",
+    "createdAt": "2025-05-01T10:00:00Z",
+    "replies": [
+      {
+        "commentId": "c1",
+        "author": "Expert Bekele",
+        "role": "Expert",
+        "message": "You can also try sticky traps.",
+        "createdAt": "2025-05-01T12:00:00Z"
+      },
+      {
+        "commentId": "c2",
+        "author": "Expert Hana",
+        "role": "Expert",
+        "message": "Neem oil works well during rainy times.",
+        "createdAt": "2025-05-01T12:05:00Z"
+      },
+      {
+        "commentId": "c3",
+        "author": "Expert Dawit",
+        "role": "Expert",
+        "message": "Rotate crops to confuse pests.",
+        "createdAt": "2025-05-01T12:10:00Z"
+      }
+    ]
+  },
+  {
+    "questionId": "q2",
+    "author": "Farmer Meron",
+    "role": "Farmer",
+    "imageUrl": "",
+    "question": "What fertilizer is best for maize?",
+    "createdAt": "2025-05-02T09:30:00Z",
+    "replies": [
+      {
+        "commentId": "c4",
+        "author": "Expert Hana",
+        "role": "Expert",
+        "message": "Use NPK 20-10-10 at the early stage.",
+        "createdAt": "2025-05-02T10:00:00Z"
+      },
+      {
+        "commentId": "c5",
+        "author": "Expert Tesfaye",
+        "role": "Expert",
+        "message": "Organic compost also helps improve soil health.",
+        "createdAt": "2025-05-02T10:15:00Z"
+      }
+    ]
+  },
+  {
+    "questionId": "q3",
+    "author": "Farmer Kibrom",
+    "role": "Farmer",
+    "question": "Why are my leaves turning yellow?",
+    "createdAt": "2025-05-03T08:15:00Z",
+    "replies": [
+      {
+        "commentId": "c6",
+        "author": "Expert Dawit",
+        "role": "Expert",
+        "message": "Could be nitrogen deficiency.",
+        "createdAt": "2025-05-03T08:30:00Z"
+      },
+      {
+        "commentId": "c7",
+        "author": "Expert Hana",
+        "role": "Expert",
+        "message": "Check your watering schedule too.",
+        "createdAt": "2025-05-03T08:35:00Z"
+      },
+      {
+        "commentId": "c8",
+        "author": "Expert Bekele",
+        "role": "Expert",
+        "message": "It may also be root rot, avoid waterlogging.",
+        "createdAt": "2025-05-03T08:40:00Z"
+      }
+    ]
+  },
+  {
+    "questionId": "q4",
+    "author": "Farmer Eden",
+    "role": "Farmer",
+    "question": "How often should I water tomato plants?",
+    "createdAt": "2025-05-04T07:50:00Z",
+    "replies": [
+      {
+        "commentId": "c9",
+        "author": "Expert Hana",
+        "role": "Expert",
+        "message": "Water 2-3 times per week depending on the weather.",
+        "createdAt": "2025-05-04T08:00:00Z"
+      },
+      {
+        "commentId": "c10",
+        "author": "Expert Tesfaye",
+        "role": "Expert",
+        "message": "Keep soil moist, not soaked.",
+        "createdAt": "2025-05-04T08:10:00Z"
+      }
+    ]
+  },
+  {
+    "questionId": "q5",
+    "author": "Farmer Samuel",
+    "role": "Farmer",
+    "question": "Is mulching good for dry areas?",
+    "createdAt": "2025-05-05T10:20:00Z",
+    "replies": [
+      {
+        "commentId": "c11",
+        "author": "Expert Dawit",
+        "role": "Expert",
+        "message": "Yes! Mulch reduces water loss and cools soil.",
+        "createdAt": "2025-05-05T10:30:00Z"
+      }
+    ]
+  },
+  {
+    "questionId": "q6",
+    "author": "Farmer Hiwot",
+    "role": "Farmer",
+    "question": "Which pesticide is safest for beans?",
+    "createdAt": "2025-05-06T11:00:00Z",
+    "replies": [
+      {
+        "commentId": "c12",
+        "author": "Expert Bekele",
+        "role": "Expert",
+        "message": "Try using biopesticides like Spinosad.",
+        "createdAt": "2025-05-06T11:20:00Z"
+      },
+      {
+        "commentId": "c13",
+        "author": "Expert Hana",
+        "role": "Expert",
+        "message": "Avoid broad-spectrum pesticides; they harm helpful insects.",
+        "createdAt": "2025-05-06T11:25:00Z"
+      }
+    ]
+  },
+  {
+    "questionId": "q7",
+    "author": "Farmer Getu",
+    "role": "Farmer",
+    "question": "How do I know if my soil is acidic?",
+    "createdAt": "2025-05-07T09:10:00Z",
+    "replies": [
+      {
+        "commentId": "c14",
+        "author": "Expert Dawit",
+        "role": "Expert",
+        "message": "Use a simple pH test kit from any agri shop.",
+        "createdAt": "2025-05-07T09:30:00Z"
+      }
+    ]
+  },
+  {
+    "questionId": "q8",
+    "author": "Farmer Almaz",
+    "role": "Farmer",
+    "question": "Best time to plant onions?",
+    "createdAt": "2025-05-08T07:00:00Z",
+    "replies": [
+      {
+        "commentId": "c15",
+        "author": "Expert Tesfaye",
+        "role": "Expert",
+        "message": "Plant during dry season with controlled irrigation.",
+        "createdAt": "2025-05-08T07:30:00Z"
+      },
+      {
+        "commentId": "c16",
+        "author": "Expert Bekele",
+        "role": "Expert",
+        "message": "Late October is good in most regions.",
+        "createdAt": "2025-05-08T07:35:00Z"
+      }
+    ]
+  },
+  {
+    "questionId": "q9",
+    "author": "Farmer Tsegaye",
+    "role": "Farmer",
+    "question": "How do I store harvested maize for long?",
+    "createdAt": "2025-05-09T06:45:00Z",
+    "replies": [
+      {
+        "commentId": "c17",
+        "author": "Expert Hana",
+        "role": "Expert",
+        "message": "Keep it in a dry, airtight container.",
+        "createdAt": "2025-05-09T07:00:00Z"
+      },
+      {
+        "commentId": "c18",
+        "author": "Expert Dawit",
+        "role": "Expert",
+        "message": "Use ash or neem leaves to prevent insects.",
+        "createdAt": "2025-05-09T07:05:00Z"
+      }
+    ]
+  },
+  {
+    "questionId": "q10",
+    "author": "Farmer Rahel",
+    "role": "Farmer",
+    "question": "What spacing is ideal for cabbage planting?",
+    "createdAt": "2025-05-10T08:10:00Z",
+    "replies": [
+      {
+        "commentId": "c19",
+        "author": "Expert Bekele",
+        "role": "Expert",
+        "message": "45cm between plants and 60cm between rows.",
+        "createdAt": "2025-05-10T08:20:00Z"
+      }
+    ]
+  }
+]
