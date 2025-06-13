@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:maize_guard/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:maize_guard/l10n/bloc/lang_bloc.dart';
 import '../../../auth/domain/entities/entity.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ProfilePage extends StatefulWidget {
   final User? user; // ✅ make it nullable
@@ -32,7 +34,8 @@ class _ProfilePageState extends State<ProfilePage> {
     firstNameController = TextEditingController(text: user?.firstName ?? "");
     lastNameController = TextEditingController(text: user?.lastName ?? "");
     emailController = TextEditingController(text: user?.email ?? "");
-    phoneController = TextEditingController(text: user?.phone ?? "");
+    phoneController = TextEditingController(
+        text: user?.phone.replaceFirst("+251", '0') ?? "");
 
     firstNameController.addListener(_checkForChanges);
     lastNameController.addListener(_checkForChanges);
@@ -126,54 +129,83 @@ class _ProfilePageState extends State<ProfilePage> {
         },
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              CircleAvatar(
-                radius: 45,
-                backgroundColor: Colors.blue.shade100,
-                child: ClipOval(
-                  child: Image.asset(
-                    "assets/${user.role}.png",
-                    fit: BoxFit.cover,
-                    width: 90,
-                    height: 90,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              buildField("First Name", firstNameController, user),
-              const SizedBox(height: 15),
-              buildField("Last Name", lastNameController, user),
-              const SizedBox(height: 15),
-              buildField("Email (optional)", emailController, user),
-              const SizedBox(height: 15),
-              buildField("Phone", phoneController, user),
-              const SizedBox(height: 30),
-              user.role != "expert"
-                  ? ElevatedButton(
-                      onPressed: (isSaving || !hasChanged)
-                          ? null
-                          : () => saveProfile(),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 23, 165, 28),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 40, vertical: 15),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+          child: BlocBuilder<LangBloc, LangState>(
+            builder: (context, langState) {
+              return Column(
+                children: [
+                  CircleAvatar(
+                    radius: 45,
+                    backgroundColor: Colors.blue.shade100,
+                    child: ClipOval(
+                      child: Image.asset(
+                        "assets/${user.role}.png",
+                        fit: BoxFit.cover,
+                        width: 90,
+                        height: 90,
                       ),
-                      child: isSaving
-                          ? const CircularProgressIndicator(
-                              color: Colors.white,
-                            )
-                          : const Text(
-                              "Save Changes",
-                              style:
-                                  TextStyle(fontSize: 16, color: Colors.white),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  buildField(AppLocalizations.of(context)!.fName,
+                      firstNameController, user),
+                  const SizedBox(height: 15),
+                  buildField(AppLocalizations.of(context)!.lName,
+                      lastNameController, user),
+                  const SizedBox(height: 15),
+                  buildField(
+                      "${AppLocalizations.of(context)!.email}  (${AppLocalizations.of(context)!.optional})",
+                      emailController,
+                      user),
+                  const SizedBox(height: 15),
+                  // buildField(AppLocalizations.of(context)!.phone,
+                  //     phoneController, user),
+                  TextFormField(
+                      controller: phoneController,
+                      keyboardType: TextInputType.phone,
+                      decoration: InputDecoration(
+                        labelText: 'Phone Number',
+                        hintText: "09XXXXXXXX",
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                      ),
+                      validator: (val) {
+                        if (val == null || val.isEmpty) {
+                          return 'Phone number is required';
+                        }
+                        final phoneRegex = RegExp(r'^(09\d{8})$');
+                        return phoneRegex.hasMatch(val)
+                            ? null
+                            : 'Enter valid phone number';
+                      }),
+                  const SizedBox(height: 30),
+                  user.role != "expert"
+                      ? ElevatedButton(
+                          onPressed: (isSaving || !hasChanged)
+                              ? null
+                              : () => saveProfile(),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                const Color.fromARGB(255, 23, 165, 28),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 40, vertical: 15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                    )
-                  : const SizedBox(),
-            ],
+                          ),
+                          child: isSaving
+                              ? const CircularProgressIndicator(
+                                  color: Colors.white,
+                                )
+                              : Text(
+                                  AppLocalizations.of(context)!.save_changes,
+                                  style: TextStyle(
+                                      fontSize: 16, color: Colors.white),
+                                ),
+                        )
+                      : const SizedBox(),
+                ],
+              );
+            },
           ),
         ),
       ),

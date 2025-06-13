@@ -13,16 +13,20 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
+import '../../../../core/constant/socket_helper.dart';
+
 class CommunityRepoImpl implements CommunityRepo {
   final NetworkInfo networkInfo;
   final SharedPreferences sharedPreferences;
   final http.Client client;
-  final IO.Socket socket;
+  IO.Socket get socket => SocketManager.socket;
+
+  // final IO.Socket socket;
   CommunityRepoImpl({
     required this.networkInfo,
     required this.sharedPreferences,
     required this.client,
-    required this.socket,
+    // required this.socket,
   }) {
     _initSocket();
   }
@@ -32,6 +36,8 @@ class CommunityRepoImpl implements CommunityRepo {
 
   void _initSocket() {
     socket.on('new_notification', (data) {
+      print("new notification");
+      print(data);
       final notification = NotificationModel.fromMap(data);
       _notificationController.add(notification);
     });

@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:dartz/dartz.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:maize_guard/core/constant/socket_helper.dart';
 import 'package:maize_guard/features/auth/domain/entities/entity.dart';
 import 'package:maize_guard/features/help/data/repository/database.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -31,6 +33,7 @@ class AuthRepoImpl implements AuthRepository {
     print("token");
     print(token);
     if (token != null) {
+      SocketManager.initSocket(sharedPreferences.getString("userid")!);
       return Future.value(Right(token));
     } else {
       return Future.value(Left(ServerFailure(message: "Login first")));
@@ -87,6 +90,7 @@ class AuthRepoImpl implements AuthRepository {
               "role", responseBody["user"]["role"]);
           await sharedPreferences.setString(
               "user", jsonEncode(responseBody["user"]));
+          SocketManager.initSocket(data["userId"]);
           return Future.value(Right(token));
         } else {
           return Left(ServerFailure(message: responseBody["message"]));
@@ -99,7 +103,7 @@ class AuthRepoImpl implements AuthRepository {
       return Left(ServerFailure(message: "Timeout, please try later."));
     } catch (e) {
       print(e.toString());
-      return Future.value(Left(ServerFailure(message: "Login failed")));
+      return Future.value(Left(ServerFailure(message: "Inavalid credentials")));
     }
   }
 
@@ -107,25 +111,42 @@ class AuthRepoImpl implements AuthRepository {
   Future<Either<Failure, User>> register(User user) async {
     if (await networkInfo.isConnected) {
       try {
+        print(user.toJson());
+        var input;
+        if (user.email.isEmpty) {
+          print("testing email");
+          input = {
+            'firstName': user.firstName,
+            'lastName': user.lastName,
+            'languagePref': "en",
+            'phone': "+251${user.phone.substring(1)}",
+            'password': user.password,
+            'role': user.role,
+          };
+        } else {
+          input = {
+            'firstName': user.firstName,
+            'lastName': user.lastName,
+            'email': user.email,
+            'languagePref': "en",
+            'phone': "+251${user.phone.substring(1)}",
+            'password': user.password,
+            'role': user.role,
+          };
+        }
         final response = await client
             .post(
               Uri.parse("${ApiConstant.baseUrl}/register/farmer"),
               headers: {
                 'Content-Type': 'application/json',
               },
-              body: jsonEncode({
-                'firstName': user.firstName,
-                'lastName': user.lastName,
-                'email': user.email,
-                'languagePref': "en",
-                'phone': "+251${user.phone.substring(1)}",
-                'password': user.password,
-                'role': user.role,
-              }),
+              body: jsonEncode(input),
             )
             .timeout(const Duration(seconds: 20));
 
         final Map<String, dynamic> responseBody = jsonDecode(response.body);
+        print("Response: ${response.body}");
+        print(response.statusCode);
         if (response.statusCode == 200 || response.statusCode == 201) {
           var token = responseBody['token'];
           if (token == null) {
@@ -140,6 +161,7 @@ class AuthRepoImpl implements AuthRepository {
               "role", responseBody["user"]["role"]);
           await sharedPreferences.setString(
               "user", jsonEncode(responseBody["user"]));
+          SocketManager.initSocket(data["userId"]);
           return Right(user);
         } else {
           return Left(ServerFailure(message: responseBody["message"]));

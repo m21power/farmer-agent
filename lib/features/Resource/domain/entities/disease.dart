@@ -4,6 +4,7 @@ class Disease {
   final String signs;
   final String treatments;
   final String prevention;
+  final String description;
   final DateTime createdAt;
 
   Disease({
@@ -13,6 +14,7 @@ class Disease {
     required this.treatments,
     required this.prevention,
     required this.createdAt,
+    required this.description,
   });
 
   factory Disease.fromJson(Map<String, dynamic> json) {
@@ -22,7 +24,20 @@ class Disease {
       signs: json['signs'],
       treatments: json['treatments'],
       prevention: json['prevention'],
+      description: json['description'],
       createdAt: DateTime.parse(json['createdAt']),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'name': name,
+      'signs': signs,
+      'treatments': treatments,
+      'prevention': prevention,
+      'description': description,
+      'createdAt': createdAt.toIso8601String(),
+    };
   }
 }

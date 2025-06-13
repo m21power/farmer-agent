@@ -23,15 +23,26 @@ class HelpBloc extends Bloc<HelpEvent, HelpState> {
     required this.saveHistoryUsecase,
     required this.deleteHistoryUsecase,
   }) : super(HistoryInitial()) {
+    on<UpdateStateEvent>(
+      (event, emit) {
+        history.clear();
+        emit(UpdateState(
+            message: "State updated successfully!",
+            history: history,
+            isLowProbability: false));
+      },
+    );
     on<AskEvent>(
       (event, emit) async {
+        history.clear();
+
         history.insert(
             0,
             HistoryModel(
                 imageLink: "",
                 name: "name",
                 scientificName: "scientificName",
-                probability: 3.4,
+                probability: 100,
                 createdAt: "createdAt",
                 uploading: true));
         emit(AskLoadingState(history: history));
@@ -47,29 +58,29 @@ class HelpBloc extends Bloc<HelpEvent, HelpState> {
               scientificName: r.scientificName,
               probability: r.probability,
               createdAt: r.createdAt,
+              treatments: r.treatments,
               isNew: true,
               uploading: false);
           history.removeAt(0);
-          history.insert(0, hist);
-          emit(AskSuccessState(
-              message: "Question sent successfully!", history: history));
+          print("probability: ${r.probability}");
+          if (r.probability > 75) {
+            history.clear();
+            history.insert(0, hist);
+            emit(AskSuccessState(
+                message: "Question sent successfully!",
+                history: history,
+                isLowProbability: false));
+          } else {
+            history.clear();
+            history.insert(0, hist);
+            emit(AskSuccessState(
+                message: "Question sent successfully!",
+                history: history,
+                isLowProbability: true));
+          }
         });
       },
     );
-    // on<GetHistoryEvent>(
-    //   (event, emit) async {
-    //     emit(GetHistoryLoadingState());
-    //     var result = await getHistoryUsecase();
-    //     result.fold(
-    //         (l) =>
-    //             emit(HistoryErrorState(message: l.message, history: history)),
-    //         (hist) {
-    //       history = hist;
-    //       emit(GetHistorySuccessState(
-    //           message: "History retreived successfully!", history: history));
-    //     });
-    //   },
-    // );
 
     on<SaveHistoryEvent>(
       (event, emit) async {
@@ -92,23 +103,5 @@ class HelpBloc extends Bloc<HelpEvent, HelpState> {
         });
       },
     );
-    // on<DeleteHistoryEvent>(
-    //   (event, emit) async {
-    //     var result = await deleteHistoryUsecase(event.id);
-    //     result.fold(
-    //       (l) => emit(HistoryErrorState(message: l.message, history: history)),
-    //       (r) {
-    //         for (HistoryModel his in history) {
-    //           if (his.id == event.id) {
-    //             history.remove(his);
-    //             break;
-    //           }
-    //         }
-    //         emit(DeleteHistorySuccessState(
-    //             message: "Deleted Successfully!", history: history));
-    //       },
-    //     );
-    //   },
-    // );
   }
 }

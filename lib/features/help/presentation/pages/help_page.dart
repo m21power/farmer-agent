@@ -9,6 +9,9 @@ import 'package:maize_guard/features/help/presentation/bloc/bloc/history_bloc.da
 import 'package:maize_guard/features/help/presentation/bloc/help_bloc.dart';
 import 'dart:io';
 import '../../domain/entities/history_entities.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import '../widgets/law_probability_warning.dart';
 
 class HelpPage extends StatefulWidget {
   const HelpPage({super.key});
@@ -17,9 +20,113 @@ class HelpPage extends StatefulWidget {
   State<HelpPage> createState() => _HelpPageState();
 }
 
-class _HelpPageState extends State<HelpPage> {
-  final List<HistoryModel> historyList = [];
+class _HelpPageState extends State<HelpPage>
+    with SingleTickerProviderStateMixin {
+  List<HistoryModel> historyList = [];
   File? selectedImage;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<HelpBloc, HelpState>(listener: (context, state) {
+      print("state: $state");
+
+      if (state is SaveHistorySuccessState) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.savedSuccessfully),
+            backgroundColor: Colors.green,
+          ),
+        );
+        context.read<HistoryBloc>().add(GetHistoryEvent());
+      }
+
+      if (state is AskSuccessState || state is AskLoadingState) {
+        setState(() {
+          historyList = state.history;
+        });
+      }
+      if (state is HistoryErrorState) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.saveError),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }, builder: (context, state) {
+      final isHistoryEmpty = state.history.isEmpty;
+
+      return Scaffold(
+        floatingActionButton: isHistoryEmpty
+            ? null // Don't show FAB when history is empty
+            : FloatingActionButton.extended(
+                onPressed: pickImage,
+                icon: const Icon(Icons.camera_alt, color: Colors.white),
+                label: Text(AppLocalizations.of(context)!.scan_maize,
+                    style: TextStyle(
+                        fontWeight: FontWeight.w600, color: Colors.white)),
+                backgroundColor: const Color.fromARGB(255, 23, 165, 28),
+              ),
+        body: Stack(
+          children: [
+            Container(
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage("assets/crop.png"),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            isHistoryEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          AppLocalizations.of(context)!.welcome,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontSize: 24,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                const Color.fromARGB(255, 23, 165, 28),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 12),
+                          ),
+                          onPressed: pickImage,
+                          icon:
+                              const Icon(Icons.camera_alt, color: Colors.white),
+                          label: Text(
+                            AppLocalizations.of(context)!.scan_maize,
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                                fontSize: 16),
+                          ),
+                        )
+                      ],
+                    ),
+                  )
+                : RefreshIndicator(
+                    onRefresh: () async {
+                      // context.read<HelpBloc>().add(GetHistoryEvent());
+                    },
+                    child: ListView.builder(
+                      itemCount: historyList.length,
+                      itemBuilder: (context, index) =>
+                          buildHistoryItem(historyList[index]),
+                    ),
+                  ),
+          ],
+        ),
+      );
+    });
+  }
 
   Future<void> pickImage() async {
     showModalBottomSheet(
@@ -32,8 +139,8 @@ class _HelpPageState extends State<HelpPage> {
                 Icons.photo,
                 color: const Color.fromARGB(255, 23, 165, 28),
               ),
-              title: const Text(
-                'Pick from Gallery',
+              title: Text(
+                AppLocalizations.of(context)!.choose_fgallery,
                 style: TextStyle(color: const Color.fromARGB(255, 23, 165, 28)),
               ),
               onTap: () async {
@@ -51,8 +158,8 @@ class _HelpPageState extends State<HelpPage> {
                 Icons.camera_alt,
                 color: const Color.fromARGB(255, 23, 165, 28),
               ),
-              title: const Text(
-                'Take a Picture',
+              title: Text(
+                AppLocalizations.of(context)!.take_photo,
                 style: TextStyle(color: const Color.fromARGB(255, 23, 165, 28)),
               ),
               onTap: () async {
@@ -75,7 +182,7 @@ class _HelpPageState extends State<HelpPage> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text("Confirm Image"),
+        title: Text(AppLocalizations.of(context)!.confirmImage),
         content: Image.file(selectedImage!),
         actions: [
           TextButton(
@@ -86,7 +193,8 @@ class _HelpPageState extends State<HelpPage> {
               ),
             ),
             onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel", style: TextStyle(color: Colors.white)),
+            child: Text(AppLocalizations.of(context)!.cancel,
+                style: TextStyle(color: Colors.white)),
           ),
           TextButton(
             style: TextButton.styleFrom(
@@ -101,7 +209,8 @@ class _HelpPageState extends State<HelpPage> {
                   .read<HelpBloc>()
                   .add(AskEvent(imagePath: selectedImage!.path));
             },
-            child: const Text("Send", style: TextStyle(color: Colors.white)),
+            child: Text(AppLocalizations.of(context)!.send,
+                style: TextStyle(color: Colors.white)),
           )
         ],
       ),
@@ -119,8 +228,8 @@ class _HelpPageState extends State<HelpPage> {
               Icons.copy,
               color: const Color(0xFF0A65AF),
             ),
-            title: const Text(
-              "Copy Response",
+            title: Text(
+              AppLocalizations.of(context)!.copyResponse,
               style: TextStyle(color: const Color(0xFF0A65AF)),
             ),
             onTap: () {
@@ -128,8 +237,22 @@ class _HelpPageState extends State<HelpPage> {
                   "Name: ${model.name}\nScientific Name: ${model.scientificName}\nProbability: ${model.probability}\nDescription: ${model.description ?? 'N/A'}";
               Navigator.pop(context);
               Clipboard.setData(ClipboardData(text: copyText));
-              ScaffoldMessenger.of(context)
-                  .showSnackBar(const SnackBar(content: Text("Copied!")));
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text(AppLocalizations.of(context)!.copied)));
+            },
+          ),
+          ListTile(
+            leading: const Icon(
+              Icons.delete,
+              color: Colors.red,
+            ),
+            title: Text(
+              AppLocalizations.of(context)!.delete,
+              style: TextStyle(color: Colors.red),
+            ),
+            onTap: () {
+              Navigator.pop(context);
+              context.read<HelpBloc>().add(UpdateStateEvent());
             },
           ),
         ],
@@ -138,7 +261,10 @@ class _HelpPageState extends State<HelpPage> {
   }
 
   Widget buildHistoryItem(HistoryModel model) {
-    final isLowProbability = model.probability < 50;
+    final isLowProbability = model.probability < 75;
+    if (isLowProbability) {
+      return LowProbabilityWarning();
+    }
     return model.uploading == true
         ? const LinearProgressIndicator(
             backgroundColor: Colors.white,
@@ -204,7 +330,7 @@ class _HelpPageState extends State<HelpPage> {
                         ),
                         child: Row(
                           children: [
-                            model.isNew == true
+                            model.isNew == true && !isLowProbability
                                 ? IconButton(
                                     icon: const Icon(Icons.bookmark,
                                         color: Colors.white),
@@ -214,11 +340,13 @@ class _HelpPageState extends State<HelpPage> {
                                     },
                                   )
                                 : SizedBox(),
-                            IconButton(
-                              icon: const Icon(Icons.more_vert,
-                                  color: Colors.white),
-                              onPressed: () => showMenuOptions(model),
-                            ),
+                            !isLowProbability
+                                ? IconButton(
+                                    icon: const Icon(Icons.more_vert,
+                                        color: Colors.white),
+                                    onPressed: () => showMenuOptions(model),
+                                  )
+                                : SizedBox()
                           ],
                         ),
                       ),
@@ -242,112 +370,77 @@ class _HelpPageState extends State<HelpPage> {
                       if (model.description != null &&
                           model.description!.isNotEmpty)
                         Text("Description: ${model.description}"),
+
+                      // Treatments (optional and expandable)
+                      if (model.treatments != null &&
+                          model.treatments!.isNotEmpty)
+                        const SizedBox(height: 8),
+                      if (model.treatments != null &&
+                          model.treatments!.isNotEmpty)
+                        ExpandableTreatments(model.treatments!),
+
+                      const SizedBox(height: 12),
+
+                      // Created at (moved to bottom and styled)
                       Text(
-                          "Created: ${DateFormat('yyyy-MM-dd – kk:mm').format(DateTime.parse(model.createdAt))}",
-                          style: const TextStyle(
-                              fontSize: 12, color: Colors.grey)),
+                        "Created: ${DateFormat('yyyy-MM-dd – kk:mm').format(DateTime.parse(model.createdAt))}",
+                        style:
+                            const TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
                     ],
                   ),
-                )
+                ),
               ],
             ),
           );
   }
+}
+
+class ExpandableTreatments extends StatefulWidget {
+  final List<String> treatments;
+
+  const ExpandableTreatments(this.treatments, {Key? key}) : super(key: key);
+
+  @override
+  State<ExpandableTreatments> createState() => ExpandableTreatmentsState();
+}
+
+class ExpandableTreatmentsState extends State<ExpandableTreatments> {
+  bool isExpanded = false;
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<HelpBloc, HelpState>(listener: (context, state) {
-      print("state: $state");
-      if (state is SaveHistorySuccessState) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Saved successfully!"),
-            backgroundColor: Colors.green,
-          ),
-        );
-        context.read<HistoryBloc>().add(GetHistoryEvent());
-      }
+    final displayedTreatments =
+        isExpanded ? widget.treatments : widget.treatments.take(2).toList();
 
-      if (state is HistoryErrorState) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Error occurred while saving,try again!"),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }, builder: (context, state) {
-      final isHistoryEmpty = state.history.isEmpty;
-
-      return Scaffold(
-        floatingActionButton: isHistoryEmpty
-            ? null // Don't show FAB when history is empty
-            : FloatingActionButton.extended(
-                onPressed: pickImage,
-                icon: const Icon(Icons.camera_alt, color: Colors.white),
-                label: const Text("Scan Maize",
-                    style: TextStyle(
-                        fontWeight: FontWeight.w600, color: Colors.white)),
-                backgroundColor: const Color.fromARGB(255, 23, 165, 28),
-              ),
-        body: Stack(
-          children: [
-            Container(
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage("assets/crop.png"),
-                  fit: BoxFit.cover,
-                ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text("Treatments:",
+            style: TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 4),
+        ...displayedTreatments.map((treatment) => Row(
+              children: [
+                const Icon(Icons.medical_services,
+                    size: 16, color: Colors.blue),
+                const SizedBox(width: 8),
+                Expanded(child: Text(treatment)),
+              ],
+            )),
+        if (widget.treatments.length > 2)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: GestureDetector(
+              onTap: () => setState(() => isExpanded = !isExpanded),
+              child: Text(
+                isExpanded
+                    ? AppLocalizations.of(context)!.see_less
+                    : AppLocalizations.of(context)!.see_more,
+                style: const TextStyle(color: Colors.blue),
               ),
             ),
-            isHistoryEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text(
-                          "Welcome to Maize Guard! Scan your maize to receive expert assistance and guidance.",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              fontSize: 24,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                const Color.fromARGB(255, 23, 165, 28),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 24, vertical: 12),
-                          ),
-                          onPressed: pickImage,
-                          icon:
-                              const Icon(Icons.camera_alt, color: Colors.white),
-                          label: const Text(
-                            "Scan Maize",
-                            style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                                fontSize: 16),
-                          ),
-                        )
-                      ],
-                    ),
-                  )
-                : RefreshIndicator(
-                    onRefresh: () async {
-                      // context.read<HelpBloc>().add(GetHistoryEvent());
-                    },
-                    child: ListView.builder(
-                      itemCount: state.history.length,
-                      itemBuilder: (context, index) =>
-                          buildHistoryItem(state.history[index]),
-                    ),
-                  ),
-          ],
-        ),
-      );
-    });
+          ),
+      ],
+    );
   }
 }

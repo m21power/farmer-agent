@@ -2,6 +2,7 @@ import 'package:get_it/get_it.dart' as get_it;
 import 'package:http/http.dart' as http;
 import 'package:maize_guard/features/Resource/data/repo/repo_impl.dart';
 import 'package:maize_guard/features/Resource/domain/repository/get_info_repo.dart';
+import 'package:maize_guard/features/Resource/domain/usecases/delete_disease_usecase.dart';
 import 'package:maize_guard/features/Resource/presentation/bloc/info_bloc.dart';
 import 'package:maize_guard/features/auth/domain/repository/auth_repository.dart';
 import 'package:maize_guard/features/community/domain/usecases/get_notification_usecase.dart';
@@ -18,9 +19,10 @@ import 'package:maize_guard/features/help/presentation/bloc/bloc/history_bloc.da
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
-import 'core/constant/socket_helper.dart';
 import 'core/network/network_info.dart';
+import 'features/Resource/domain/usecases/add_disease_usecase.dart';
 import 'features/Resource/domain/usecases/get_info_usecase.dart';
+import 'features/Resource/domain/usecases/update_disease_usecase.dart';
 import 'features/auth/data/repository/auth_repo_impl.dart';
 import 'features/auth/domain/usecases/is_logged_in_usecase.dart';
 import 'features/auth/domain/usecases/log_out_usecase.dart';
@@ -45,6 +47,7 @@ import 'features/profile/data/repository/profile_repo_impl.dart';
 import 'features/profile/domain/repository/profile_repo.dart';
 import 'features/profile/domain/usecases/update_profile_usecase.dart';
 import 'features/profile/presentation/bloc/profile_bloc.dart';
+import 'l10n/bloc/lang_bloc.dart';
 
 final sl = get_it.GetIt.instance;
 
@@ -54,6 +57,7 @@ Future<void> init() async {
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton<SharedPreferences>(() => sharedPreferences);
   sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl());
+
   // auth
   // repository
   sl.registerLazySingleton<AuthRepository>(() => AuthRepoImpl(
@@ -67,6 +71,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => LogOutUsecase(authRepository: sl()));
   sl.registerLazySingleton(() => IsLoggedInUsecase(authRepository: sl()));
   sl.registerLazySingleton(() => SignUpUsecase(authRepository: sl()));
+
   // bloc
   sl.registerFactory(() => AuthBloc(
         loginUsecase: sl(),
@@ -88,6 +93,7 @@ Future<void> init() async {
   sl.registerFactory(() => ProfileBloc(
         updateProfileUsecase: sl(),
       ));
+
   // help
   // repository
   sl.registerLazySingleton<AskRepository>(() => AskRepositoryImpl(
@@ -115,15 +121,15 @@ Future<void> init() async {
   //socket
   var userId = sl<SharedPreferences>().getString("userid");
 
-  IO.Socket socket = SocketHelper.createSocket(userId ?? "123");
-  sl.registerLazySingleton<IO.Socket>(() => socket);
+  // IO.Socket socket = SocketHelper.createSocket(userId ?? "123");
+  // sl.registerLazySingleton<IO.Socket>(() => socket);
   // community
   // repository
   sl.registerLazySingleton<CommunityRepo>(() => CommunityRepoImpl(
         sharedPreferences: sl(),
         networkInfo: sl(),
         client: sl(),
-        socket: sl(),
+        // socket: sl(),
       ));
   // usecases
   sl.registerLazySingleton(() => GetPostUsecase(communityRepo: sl()));
@@ -164,8 +170,20 @@ Future<void> init() async {
     () => RepoImpl(client: sl(), networkInfo: sl()),
   );
   sl.registerLazySingleton(() => GetInfoUsecase(repository: sl()));
+  sl.registerLazySingleton<DeleteDiseaseUsecase>(
+    () => DeleteDiseaseUsecase(repository: sl()),
+  );
+  sl.registerLazySingleton(() => UpdateDiseaseUsecase(repository: sl()));
+  sl.registerLazySingleton(() => AddDiseaseUsecase(repository: sl()));
   //bloc
   sl.registerFactory<InfoBloc>(
-    () => InfoBloc(getInfoUsecase: sl()),
+    () => InfoBloc(
+      getInfoUsecase: sl(),
+      deleteDiseaseUsecase: sl(),
+      updateDiseaseUsecase: sl(),
+      addDiseaseUsecase: sl(),
+    ),
   );
+  // lang bloc
+  sl.registerFactory(() => LangBloc());
 }

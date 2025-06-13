@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:maize_guard/features/auth/presentation/pages/signup_page.dart';
 
 import '../bloc/auth_bloc.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -52,6 +53,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     );
                   });
+
                   context.read<AuthBloc>().add(AuthCheckEvent());
                 }
 
@@ -63,7 +65,7 @@ class _LoginPageState extends State<LoginPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          "Login",
+                          AppLocalizations.of(context)!.login,
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -75,16 +77,20 @@ class _LoginPageState extends State<LoginPage> {
                           controller: phoneController,
                           keyboardType: TextInputType.phone,
                           decoration: InputDecoration(
-                            labelText: 'Phone Number',
+                            labelText:
+                                AppLocalizations.of(context)!.phone_number,
                             hintText: '09XXXXXXXX',
                             border: OutlineInputBorder(),
                             prefixIcon: Icon(Icons.phone),
                           ),
                           validator: (value) {
-                            if (value == null ||
-                                !RegExp(r'^09\d{8}$').hasMatch(value)) {
-                              return 'Enter valid phone number';
+                            if (value == null || value.isEmpty) {
+                              return 'Phone number is required';
                             }
+                            if (!RegExp(r'^09\d{8}$').hasMatch(value)) {
+                              return 'Invalid phone number';
+                            }
+
                             return null;
                           },
                         ),
@@ -93,7 +99,7 @@ class _LoginPageState extends State<LoginPage> {
                           controller: passwordController,
                           obscureText: isPasswordObscured,
                           decoration: InputDecoration(
-                            labelText: 'Password',
+                            labelText: AppLocalizations.of(context)!.password,
                             border: OutlineInputBorder(),
                             prefixIcon: Icon(Icons.lock),
                             suffixIcon: IconButton(
@@ -110,26 +116,15 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ),
                           validator: (value) {
-                            if (value == null || value.length < 6) {
-                              return 'Password too short';
+                            if (value == null || value.isEmpty) {
+                              return 'Password is required';
                             }
+                            if (value.length < 8) {
+                              return 'Password must be at least 8 characters';
+                            }
+
                             return null;
                           },
-                        ),
-                        SizedBox(height: 10),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: () {
-                              // Navigate to forgot password screen
-                            },
-                            child: Text(
-                              "Forgot Password?",
-                              style: TextStyle(
-                                color: const Color.fromARGB(255, 33, 75, 148),
-                              ),
-                            ),
-                          ),
                         ),
                         SizedBox(height: 10),
                         SizedBox(
@@ -168,7 +163,7 @@ class _LoginPageState extends State<LoginPage> {
                                     ),
                                   )
                                 : Text(
-                                    "Login",
+                                    AppLocalizations.of(context)!.login,
                                     style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
@@ -181,7 +176,13 @@ class _LoginPageState extends State<LoginPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text("Don't have an account?"),
+                            Text(
+                              AppLocalizations.of(context)!.dont_have_account,
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey[700],
+                              ),
+                            ),
                             TextButton(
                               onPressed: () {
                                 Navigator.push(
@@ -198,7 +199,9 @@ class _LoginPageState extends State<LoginPage> {
                                   fontSize: 16,
                                 ),
                               ),
-                              child: Text("Sign Up"),
+                              child: Text(
+                                AppLocalizations.of(context)!.sign_up,
+                              ),
                             ),
                           ],
                         ),

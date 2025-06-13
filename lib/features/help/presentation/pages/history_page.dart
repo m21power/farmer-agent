@@ -5,8 +5,10 @@ import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:maize_guard/features/help/presentation/bloc/bloc/history_bloc.dart';
+import 'package:maize_guard/features/help/presentation/pages/help_page.dart';
 
 import '../../domain/entities/history_entities.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
@@ -27,12 +29,14 @@ class _HistoryPageState extends State<HistoryPage> {
         },
         child: BlocBuilder<HistoryBloc, HistoryState>(
           builder: (context, state) {
+            print("history: $state");
             if (state is GetHistoryLoadingState) {
               return const Center(child: CircularProgressIndicator());
             } else if (state is GetHistorySuccessState) {
               historyList = List.from(state.history);
               if (historyList.isEmpty) {
-                return const Center(child: Text("No saved history yet."));
+                return Center(
+                    child: Text(AppLocalizations.of(context)!.noSavedHistory));
               }
 
               return ListView.builder(
@@ -42,7 +46,9 @@ class _HistoryPageState extends State<HistoryPage> {
                 },
               );
             } else if (state is GetHistoryErrorState) {
-              return const Center(child: Text("Failed to load history"));
+              return Center(
+                  child:
+                      Text(AppLocalizations.of(context)!.failedToLoadHistory));
             } else {
               return const SizedBox.shrink();
             }
@@ -144,13 +150,21 @@ class _HistoryPageState extends State<HistoryPage> {
                       if (model.description != null &&
                           model.description!.isNotEmpty)
                         Text("Description: ${model.description}"),
+                      if (model.treatments != null &&
+                          model.treatments!.isNotEmpty)
+                        const SizedBox(height: 8),
+                      if (model.treatments != null &&
+                          model.treatments!.isNotEmpty)
+                        ExpandableTreatments(model.treatments!),
+                      const SizedBox(height: 12),
                       Text(
-                          "Created: ${DateFormat('yyyy-MM-dd – kk:mm').format(DateTime.parse(model.createdAt))}",
-                          style: const TextStyle(
-                              fontSize: 12, color: Colors.grey)),
+                        "Created: ${DateFormat('yyyy-MM-dd – kk:mm').format(DateTime.parse(model.createdAt))}",
+                        style:
+                            const TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
                     ],
                   ),
-                )
+                ),
               ],
             ),
           );
@@ -164,21 +178,31 @@ class _HistoryPageState extends State<HistoryPage> {
         children: [
           ListTile(
             leading: const Icon(Icons.copy, color: Color(0xFF0A65AF)),
-            title: const Text("Copy Response",
+            title: Text(AppLocalizations.of(context)!.copyResponse,
                 style: TextStyle(color: Color(0xFF0A65AF))),
             onTap: () {
-              final copyText =
-                  "Name: ${model.name}\nScientific Name: ${model.scientificName}\nProbability: ${model.probability}%\nDescription: ${model.description ?? 'N/A'}";
+              final treatmentsText =
+                  (model.treatments != null && model.treatments!.isNotEmpty)
+                      ? "\nTreatments:\n- ${model.treatments!.join("\n- ")}"
+                      : "";
+
+              final copyText = "Name: ${model.name}\n"
+                  "Scientific Name: ${model.scientificName}\n"
+                  "Probability: ${model.probability}%\n"
+                  "Description: ${model.description ?? 'N/A'}"
+                  "$treatmentsText";
+
               Navigator.pop(context);
               Clipboard.setData(ClipboardData(text: copyText));
-              ScaffoldMessenger.of(context)
-                  .showSnackBar(const SnackBar(content: Text("Copied!")));
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text(AppLocalizations.of(context)!.copied)));
             },
           ),
           if (model.isNew != true)
             ListTile(
               leading: const Icon(Icons.delete, color: Colors.red),
-              title: const Text("Delete", style: TextStyle(color: Colors.red)),
+              title: Text(AppLocalizations.of(context)!.delete,
+                  style: TextStyle(color: Colors.red)),
               onTap: () {
                 Navigator.pop(context);
                 context

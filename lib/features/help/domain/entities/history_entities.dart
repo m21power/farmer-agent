@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class HistoryModel {
   int? id;
   final String imageLink;
@@ -6,6 +8,7 @@ class HistoryModel {
   final String scientificName;
   final double probability;
   final String createdAt;
+  final List<String>? treatments;
   bool? isNew;
   bool? uploading;
 
@@ -17,21 +20,27 @@ class HistoryModel {
     required this.scientificName,
     required this.probability,
     required this.createdAt,
+    this.treatments,
     this.isNew,
     this.uploading,
   });
 
-  factory HistoryModel.fromMap(Map<String, dynamic> json) => HistoryModel(
-        id: json['id'],
-        imageLink: json['imageLink'],
-        description: json['description'],
-        name: json['name'],
-        scientificName: json['scientificName'],
-        probability: json['probability'],
-        createdAt: json['createdAt'],
-        isNew: json['isNew'] ?? false,
-        uploading: json['uploading'] ?? false,
-      );
+  factory HistoryModel.fromMap(Map<String, dynamic> json) {
+    return HistoryModel(
+      id: json['id'],
+      imageLink: json['imageLink'],
+      description: json['description'],
+      name: json['name'],
+      scientificName: json['scientificName'],
+      probability: json['probability'],
+      createdAt: json['createdAt'],
+      isNew: json['isNew'] ?? false,
+      uploading: json['uploading'] ?? false,
+      treatments: (json['treatments'] != null && json['treatments'] is String)
+          ? List<String>.from(jsonDecode(json['treatments']))
+          : null,
+    );
+  }
   factory HistoryModel.fromJson(Map<String, dynamic> json) {
     return HistoryModel(
       id: json['id'],
@@ -43,6 +52,9 @@ class HistoryModel {
       createdAt: json['createdAt'] ?? DateTime.now().toString(),
       isNew: json['isNew'] ?? false,
       uploading: json['uploading'] ?? false,
+      treatments: json['treatments'] != null
+          ? List<String>.from(json['treatments'] as List)
+          : null,
     );
   }
 
@@ -54,5 +66,6 @@ class HistoryModel {
         'scientificName': scientificName,
         'probability': probability,
         'createdAt': createdAt,
+        'treatments': treatments != null ? jsonEncode(treatments) : null,
       };
 }

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:maize_guard/features/community/presentation/bloc/community_bloc.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AskQuestionView extends StatefulWidget {
   final VoidCallback onCancel;
@@ -30,8 +32,8 @@ class _AskQuestionViewState extends State<AskQuestionView> {
                 Icons.camera_alt,
                 color: const Color.fromARGB(255, 23, 165, 28),
               ),
-              title: const Text(
-                "Take a Photo",
+              title: Text(
+                AppLocalizations.of(context)!.take_photo,
                 style: TextStyle(color: const Color.fromARGB(255, 23, 165, 28)),
               ),
               onTap: () async {
@@ -50,8 +52,8 @@ class _AskQuestionViewState extends State<AskQuestionView> {
                 Icons.photo,
                 color: const Color.fromARGB(255, 23, 165, 28),
               ),
-              title: const Text(
-                "Choose from Gallery",
+              title: Text(
+                AppLocalizations.of(context)!.choose_fgallery,
                 style: TextStyle(color: const Color.fromARGB(255, 23, 165, 28)),
               ),
               onTap: () async {
@@ -89,14 +91,14 @@ class _AskQuestionViewState extends State<AskQuestionView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text("Your Question",
+              Text(AppLocalizations.of(context)!.your_question,
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               TextField(
                 controller: questionController,
                 maxLines: 5,
                 decoration: InputDecoration(
-                  hintText: "Describe your issue here...",
+                  hintText: AppLocalizations.of(context)!.descripe_issue,
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
@@ -113,7 +115,7 @@ class _AskQuestionViewState extends State<AskQuestionView> {
                       backgroundColor: const Color.fromARGB(255, 23, 165, 28),
                     ),
                     icon: const Icon(Icons.attach_file, color: Colors.white),
-                    label: const Text("Attach Image",
+                    label: Text(AppLocalizations.of(context)!.attach_image,
                         style: TextStyle(color: Colors.white)),
                   ),
                   const SizedBox(width: 12),
@@ -167,14 +169,15 @@ class _AskQuestionViewState extends State<AskQuestionView> {
 
                     widget.onCancel();
                   } else {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text("Please describe your issue!"),
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(
+                          AppLocalizations.of(context)!.writeImageDescription),
                       backgroundColor: Colors.red,
                     ));
                   }
                 },
                 icon: const Icon(Icons.send, color: Colors.white),
-                label: const Text("Submit Question",
+                label: Text(AppLocalizations.of(context)!.submit_question,
                     style: TextStyle(color: Colors.white)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromARGB(255, 23, 165, 28),

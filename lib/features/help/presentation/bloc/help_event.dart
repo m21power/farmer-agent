@@ -22,3 +22,5 @@ class SaveHistoryEvent extends HelpEvent {
   final HistoryModel history;
   const SaveHistoryEvent({required this.history});
 }
+
+class UpdateStateEvent extends HelpEvent {}

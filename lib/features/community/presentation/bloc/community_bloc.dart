@@ -19,6 +19,7 @@ import '../../../../main.dart';
 import '../../domain/entities/post_entities.dart';
 import '../../domain/usecases/get_post_usecase.dart';
 import '../../domain/usecases/post_reply_usecase.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 part 'community_event.dart';
 part 'community_state.dart';
@@ -247,18 +248,14 @@ class CommunityBloc extends Bloc<CommunityEvent, CommunityState> {
       });
     });
     on<RealTimeNotificationEvent>((event, emit) {
-      var userid = sl<SharedPreferences>().getString("userid");
-      var postid = event.notification.questionId;
-      for (var pos in posts) {
-        if (pos.id == postid) {
-          if (pos.autorId == userid) {
-            return;
-          }
-        }
-      }
       print("RealTimeNotificationEvent");
-      showUserActionNotification(
-          event.notification.author, 'added a new comment');
+      var langCode = sl<SharedPreferences>().getString('langCode') ?? 'en';
+      if (langCode == 'en') {
+        showUserActionNotification(
+            event.notification.author, 'replied to your question');
+      } else {
+        showUserActionNotification(event.notification.author, "አዲስ አስተያየት ጨመረ");
+      }
       print(event.notification);
       final updatedNotifications = [event.notification, ...notifications];
       ReplyModel replyModel = ReplyModel(
@@ -283,6 +280,13 @@ class CommunityBloc extends Bloc<CommunityEvent, CommunityState> {
     on<RealTimeQuestionEvent>((event, emit) {
       if (event.post.autorId != sl<SharedPreferences>().getString("userid")) {
         print("RealTimeQuestionEvent");
+        var langCode = sl<SharedPreferences>().getString('langCode') ?? 'en';
+        if (langCode == 'en') {
+          showUserActionNotification(event.post.author, 'added a new question');
+        } else {
+          showUserActionNotification(event.post.author, "አዲስ ጥያቄ ጨመረ");
+        }
+
         showUserActionNotification(event.post.author, 'added a new question');
         final updatedPosts = [event.post, ...posts];
         NotificationModel notification = NotificationModel(

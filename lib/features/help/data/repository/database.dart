@@ -26,16 +26,17 @@ class HistoryDatabase {
 
   Future _createDB(Database db, int version) async {
     await db.execute('''
-      CREATE TABLE history (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        imageLink TEXT NOT NULL,
-        description TEXT,
-        name TEXT NOT NULL,
-        scientificName TEXT NOT NULL,
-        probability REAL NOT NULL,
-        createdAt TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-      )
-    ''');
+    CREATE TABLE history (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      imageLink TEXT NOT NULL,
+      description TEXT,
+      name TEXT NOT NULL,
+      scientificName TEXT NOT NULL,
+      probability REAL NOT NULL,
+      treatments TEXT, -- store as JSON string
+      createdAt TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )
+  ''');
   }
 
   Future close() async {

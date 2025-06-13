@@ -4,6 +4,7 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import '../bloc/community_bloc.dart';
 import '../widgets/ask_question_view.dart';
 import '../widgets/post_item.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class CommunityPage extends StatefulWidget {
   const CommunityPage({super.key});
@@ -33,20 +34,22 @@ class _CommunityPageState extends State<CommunityPage> {
                   listener: (context, state) {
                 if (state is PostingLoadingState) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Posting...")),
+                    SnackBar(
+                        content: Text(AppLocalizations.of(context)!.posting)),
                   );
                 } else if (state is PostQuestionSuccessState) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Posted successfully"),
+                    SnackBar(
+                      content: Text(
+                          AppLocalizations.of(context)!.postedSuccessfully),
                       backgroundColor: Colors.green,
                     ),
                   );
                   // posts.insert(0, state.post);
                 } else if (state is CommunityError) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(state.message)),
-                  );
+                  // ScaffoldMessenger.of(context).showSnackBar(
+                  //   SnackBar(content: Text(state.message)),
+                  // );
                 }
                 if (state is DeletePostSuccessState) {
                   setState(() {});
@@ -56,17 +59,18 @@ class _CommunityPageState extends State<CommunityPage> {
                   setState(() {});
                 }
                 if (state.posts.isEmpty) {
-                  response = "No posts yet, be the first to ask a question!";
+                  response = AppLocalizations.of(context)!.noPostsYet;
                   if (state is InternetConnectedState) {
                     if (!state.isConnected) {
-                      response = "Oops! No internet connection!";
+                      response =
+                          AppLocalizations.of(context)!.noInternetConnection;
                     }
                   }
                 }
                 if (state is ReplyFailedState) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(state.message)),
-                  );
+                  // ScaffoldMessenger.of(context).showSnackBar(
+                  //   SnackBar(content: Text(state.message)),
+                  // );
                 }
                 print("response: $response");
               }, builder: (context, state) {
@@ -78,7 +82,7 @@ class _CommunityPageState extends State<CommunityPage> {
                         child: Text(textAlign: TextAlign.center, response),
                       )
                     : ScrollablePositionedList.builder(
-                        padding: const EdgeInsets.all(16),
+                        // padding: const EdgeInsets.only(16),
                         itemCount: state.posts.length,
                         itemScrollController: itemScrollController,
                         itemBuilder: (context, index) {
@@ -141,7 +145,10 @@ class _CommunityPageState extends State<CommunityPage> {
                 onPressed: toggleAskMode,
                 icon: Icon(asking ? Icons.arrow_back : Icons.edit,
                     color: asking ? Colors.white : Colors.white),
-                label: Text(asking ? "Back" : "Ask a Question",
+                label: Text(
+                    asking
+                        ? AppLocalizations.of(context)!.back
+                        : AppLocalizations.of(context)!.ask_question,
                     style: const TextStyle(fontSize: 16, color: Colors.white)),
               ),
             ],

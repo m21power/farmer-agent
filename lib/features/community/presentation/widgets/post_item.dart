@@ -9,158 +9,216 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../dependency_injection.dart';
 import '../../domain/entities/post_entities.dart';
 import 'reply_item.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:get_it/get_it.dart';
 
 class PostItem extends StatefulWidget {
   final PostModel post;
 
-  const PostItem({super.key, required this.post});
+  const PostItem({
+    super.key,
+    required this.post,
+  });
 
   @override
   State<PostItem> createState() => _PostItemState();
 }
 
-class _PostItemState extends State<PostItem> {
-  bool showAllReplies = false;
+class _PostItemState extends State<PostItem>
+    with SingleTickerProviderStateMixin {
+  bool showComments = false;
   List<ReplyModel> allReplies = [];
+  final int commentsPerPage = 5;
+  int visibleCommentsCount = 5;
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
     allReplies = List.from(widget.post.replies);
+
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  void _toggleComments() {
+    setState(() {
+      showComments = !showComments;
+      if (showComments) {
+        _animationController.forward();
+      } else {
+        _animationController.reverse();
+      }
+    });
+  }
+
+  void _showMoreComments() {
+    setState(() {
+      visibleCommentsCount += commentsPerPage;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final repliesToShow =
-        showAllReplies ? allReplies : allReplies.take(1).toList();
     final hasImage =
         widget.post.imageUrl != null && widget.post.imageUrl!.isNotEmpty;
     final String currentUserName = "You";
+    final repliesToShow = allReplies.take(visibleCommentsCount).toList();
+    final sl = GetIt.instance;
 
     return BlocConsumer<CommunityBloc, CommunityState>(
       listener: (context, state) {
         if (state is CommunityLoaded) {
+          final updatedPost = state.posts.firstWhere(
+            (p) => p.id == widget.post.id,
+            orElse: () => widget.post,
+          );
           setState(() {
-            allReplies = List.from(widget.post.replies);
-            showAllReplies = true;
+            allReplies = List.from(updatedPost.replies);
           });
         }
       },
       builder: (context, state) {
         if (widget.post.isPosting == true) {
-          return LinearProgressIndicator(
+          return const LinearProgressIndicator(
             color: Colors.amber,
+            backgroundColor: Colors.amberAccent,
           );
         }
         return Card(
-          color: const Color.fromARGB(255, 255, 255, 255),
-          margin: const EdgeInsets.only(bottom: 10),
-          elevation: 0.5,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    CircleAvatar(
+          color: Colors.white,
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+            side: BorderSide(color: Colors.grey.shade200),
+          ),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: _toggleComments,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header
+                  Row(
+                    children: [
+                      CircleAvatar(
                         radius: 20,
-                        child: Image(
-                            image: AssetImage(
-                                "assets/${widget.post.role.toLowerCase()}.png"))),
-                    const SizedBox(width: 8),
-                    Text("${widget.post.author} | ${widget.post.role}",
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: const Color.fromARGB(255, 23, 165, 28),
-                        )),
-                    Spacer(),
-                    if (widget.post.autorId ==
-                            sl<SharedPreferences>().getString("userid") ||
-                        sl<SharedPreferences>().getString("role") == "admin")
-                      PopupMenuButton<String>(
-                        onSelected: (value) {
-                          if (value == 'edit') {
-                            _showEditCaptionDialog();
-                          } else if (value == 'delete') {
-                            showDialog(
-                              context: context,
-                              builder: (ctx) => AlertDialog(
-                                title: const Text("Delete Question"),
-                                content: const Text(
-                                    "Are you sure you want to delete this question?"),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(ctx),
-                                    child: const Text("Cancel"),
-                                  ),
-                                  ElevatedButton(
-                                    style: ButtonStyle(
-                                      backgroundColor:
-                                          MaterialStateProperty.all(Colors.red),
-                                    ),
-                                    onPressed: () {
-                                      setState(() {
-                                        context.read<CommunityBloc>().add(
-                                            DeletePostEvent(
-                                                questionId: widget.post.id));
-                                      });
-
-                                      Navigator.pop(ctx);
-                                    },
-                                    child: const Text("Delete"),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }
-                        },
-                        icon: const Icon(Icons.more_vert, size: 18),
-                        itemBuilder: (context) => [
-                          const PopupMenuItem(
-                            value: 'edit',
-                            child: ListTile(
-                              leading: Icon(
-                                Icons.edit,
-                                color: const Color.fromARGB(255, 23, 165, 28),
-                              ),
-                              title: Text(
-                                'Edit',
-                                style: TextStyle(
-                                    color: const Color.fromARGB(
-                                        255, 10, 101, 175)),
-                              ),
-                            ),
-                          ),
-                          const PopupMenuItem(
-                            value: 'delete',
-                            child: ListTile(
-                              leading: Icon(
-                                Icons.delete,
-                                color: Colors.red,
-                              ),
-                              title: Text(
-                                'Delete',
-                                style: TextStyle(color: Colors.red),
-                              ),
-                            ),
-                          ),
-                        ],
+                        foregroundImage: Image.asset(
+                          "assets/${widget.post.role.toLowerCase()}.png",
+                        ).image,
                       ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  timeAgo(widget.post.createdAt),
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                      color: Color.fromARGB(255, 161, 159, 159)),
-                ),
-                const SizedBox(height: 8),
-                if (hasImage) ...[
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "${widget.post.author} | ${getTranslatedRole(context, widget.post.role)}",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.green.shade700,
+                                  ),
+                            ),
+                            Text(
+                              timeAgo(widget.post.createdAt),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: Colors.grey.shade600,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (widget.post.autorId ==
+                              sl<SharedPreferences>().getString("userid") ||
+                          sl<SharedPreferences>().getString("role") == "admin")
+                        PopupMenuButton<String>(
+                          icon: Icon(Icons.more_vert,
+                              color: Colors.grey.shade600),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          itemBuilder: (context) => [
+                            PopupMenuItem(
+                              value: 'edit',
+                              child: ListTile(
+                                leading: Icon(Icons.edit,
+                                    color: Colors.green.shade700),
+                                title: Text(AppLocalizations.of(context)!.edit),
+                              ),
+                            ),
+                            PopupMenuItem(
+                              value: 'delete',
+                              child: ListTile(
+                                leading: Icon(Icons.delete,
+                                    color: Colors.red.shade700),
+                                title:
+                                    Text(AppLocalizations.of(context)!.delete),
+                              ),
+                            ),
+                          ],
+                          onSelected: (value) {
+                            if (value == 'edit') {
+                              _showEditCaptionDialog();
+                            } else if (value == 'delete') {
+                              showDialog(
+                                context: context,
+                                builder: (ctx) => AlertDialog(
+                                  title: Text(AppLocalizations.of(context)!
+                                      .delete_question),
+                                  content: Text(AppLocalizations.of(context)!
+                                      .confirm_delete_question),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(ctx),
+                                      child: Text(
+                                          AppLocalizations.of(context)!.cancel),
+                                    ),
+                                    ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.red.shade700,
+                                      ),
+                                      onPressed: () {
+                                        context.read<CommunityBloc>().add(
+                                              DeletePostEvent(
+                                                  questionId: widget.post.id),
+                                            );
+                                        Navigator.pop(ctx);
+                                      },
+                                      child: Text(
+                                          AppLocalizations.of(context)!.delete),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  // Image
                   if (hasImage) ...[
                     GestureDetector(
                       onTap: () => Navigator.push(
@@ -170,141 +228,178 @@ class _PostItemState extends State<PostItem> {
                               FullScreenImagePage(image: widget.post.imageUrl!),
                         ),
                       ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: CachedNetworkImage(
-                          imageUrl: widget.post.imageUrl!,
-                          imageBuilder: (context, imageProvider) => AspectRatio(
-                            aspectRatio: 16 / 9,
-                            child: Container(
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                color: Colors.black
-                                    .withAlpha((0.08 * 255).toInt()),
-                                image: DecorationImage(
-                                  image: imageProvider,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                          ),
-                          progressIndicatorBuilder: (context, url, progress) =>
-                              AspectRatio(
-                            aspectRatio: 16 / 9,
-                            child: Container(
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                color: Colors.black
-                                    .withAlpha((0.08 * 255).toInt()),
-                              ),
+                      child: Hero(
+                        tag: widget.post.imageUrl!,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: CachedNetworkImage(
+                            imageUrl: widget.post.imageUrl!,
+                            width: double.infinity,
+                            height: 200,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Container(
+                              height: 200,
+                              color: Colors.grey.shade200,
                               child: const Center(
                                   child: CupertinoActivityIndicator()),
                             ),
-                          ),
-                          errorWidget: (context, url, error) => AspectRatio(
-                            aspectRatio: 16 / 9,
-                            child: Container(
-                              width: double.infinity,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.08),
-                              ),
-                              child: const Icon(Icons.error,
-                                  color: Colors.black, size: 40),
+                            errorWidget: (context, url, error) => Container(
+                              height: 200,
+                              color: Colors.grey.shade200,
+                              child: const Icon(Icons.error, color: Colors.red),
                             ),
                           ),
                         ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  // Question
+                  Text(
+                    widget.post.question,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "${widget.post.replies.length} ${AppLocalizations.of(context)!.reply}",
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      if (sl<SharedPreferences>().getString("role") ==
+                              "expert" ||
+                          sl<SharedPreferences>().getString("userid") ==
+                              widget.post.autorId)
+                        TextButton.icon(
+                          onPressed: () {
+                            _showReplySheet(widget.post.id);
+                          },
+                          icon: Icon(Icons.reply,
+                              color: Colors.green.shade700, size: 20),
+                          label: Text(
+                            AppLocalizations.of(context)!.reply,
+                            style: TextStyle(color: Colors.green.shade700),
+                          ),
+                        ),
+                    ],
+                  ),
+                  // Comments section
+                  if (showComments && allReplies.isNotEmpty) ...[
+                    const Divider(height: 24),
+                    FadeTransition(
+                      opacity: _fadeAnimation,
+                      child: Column(
+                        children: [
+                          ...repliesToShow.map((reply) => Padding(
+                                padding: const EdgeInsets.only(bottom: 8),
+                                child: Align(
+                                  alignment: reply.authorId ==
+                                          sl<SharedPreferences>()
+                                              .getString("userid")
+                                      ? Alignment.centerRight
+                                      : Alignment.centerLeft,
+                                  child: ConstrainedBox(
+                                    constraints: BoxConstraints(
+                                      maxWidth:
+                                          MediaQuery.of(context).size.width *
+                                              0.75,
+                                    ),
+                                    child: ReplyItem(
+                                      reply: reply,
+                                      currentUserName: currentUserName,
+                                      onEdit: () => _showEditReplyDialog(reply),
+                                      onDelete: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (ctx) => AlertDialog(
+                                            title: Text(
+                                                AppLocalizations.of(context)!
+                                                    .delete_reply),
+                                            content: Text(
+                                                AppLocalizations.of(context)!
+                                                    .confirm_delete_reply),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () =>
+                                                    Navigator.pop(ctx),
+                                                child: Text(AppLocalizations.of(
+                                                        context)!
+                                                    .cancel),
+                                              ),
+                                              ElevatedButton(
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor:
+                                                      Colors.red.shade700,
+                                                ),
+                                                onPressed: () {
+                                                  setState(() {
+                                                    allReplies.removeWhere(
+                                                        (r) =>
+                                                            r.commentId ==
+                                                            reply.commentId);
+                                                  });
+                                                  context
+                                                      .read<CommunityBloc>()
+                                                      .add(
+                                                        DeleteReplyEvent(
+                                                          questionId:
+                                                              widget.post.id,
+                                                          commentId:
+                                                              reply.commentId,
+                                                        ),
+                                                      );
+                                                  Navigator.pop(ctx);
+                                                },
+                                                child: Text(AppLocalizations.of(
+                                                        context)!
+                                                    .delete),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              )),
+                          if (allReplies.length > visibleCommentsCount)
+                            TextButton(
+                              onPressed: _showMoreComments,
+                              child: Text(
+                                "${AppLocalizations.of(context)!.see_more} ...",
+                                style: TextStyle(color: Colors.green.shade700),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                   ],
-                  const SizedBox(height: 8),
-                  Text(widget.post.question,
-                      style: const TextStyle(fontSize: 16)),
-                ] else ...[
-                  Text(widget.post.question),
                 ],
-                if (sl<SharedPreferences>().getString("role") == "expert" ||
-                    sl<SharedPreferences>().getString("userid") ==
-                        widget.post.autorId)
-                  // Reply button
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton.icon(
-                      onPressed: () {
-                        _showReplySheet(widget.post.id);
-                      },
-                      icon: const Icon(
-                        Icons.reply,
-                        size: 16,
-                        color: const Color.fromARGB(255, 23, 165, 28),
-                      ),
-                      label: const Text(
-                        "Reply",
-                        style: TextStyle(
-                            color: const Color.fromARGB(255, 23, 165, 28)),
-                      ),
-                    ),
-                  ),
-                const Divider(),
-                ...repliesToShow.map(
-                  (reply) => ReplyItem(
-                    reply: reply,
-                    currentUserName: currentUserName,
-                    onEdit: () => _showEditReplyDialog(reply),
-                    onDelete: () {
-                      showDialog(
-                        context: context,
-                        builder: (ctx) => AlertDialog(
-                          title: const Text("Delete Reply"),
-                          content: const Text(
-                              "Are you sure you want to delete this reply?"),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(ctx),
-                              child: const Text("Cancel"),
-                            ),
-                            ElevatedButton(
-                              style: ButtonStyle(
-                                backgroundColor:
-                                    MaterialStateProperty.all(Colors.red),
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  allReplies.removeWhere(
-                                      (r) => r.commentId == reply.commentId);
-                                });
-
-                                context.read<CommunityBloc>().add(
-                                    DeleteReplyEvent(
-                                        questionId: widget.post.id,
-                                        commentId: reply.commentId));
-                                Navigator.pop(ctx);
-                              },
-                              child: const Text("Delete"),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                if (allReplies.length > 1)
-                  TextButton(
-                    onPressed: () {
-                      setState(() => showAllReplies = !showAllReplies);
-                    },
-                    child: Text(
-                      showAllReplies ? "See less..." : "See more...",
-                      style: TextStyle(
-                          color: const Color.fromARGB(255, 23, 165, 28)),
-                    ),
-                  ),
-              ],
+              ),
             ),
           ),
         );
       },
     );
+  }
+
+  String getTranslatedRole(BuildContext context, String role) {
+    switch (role) {
+      case 'farmer':
+        return AppLocalizations.of(context)!.farmer;
+      case 'expert':
+        return AppLocalizations.of(context)!.expert;
+      case 'admin':
+        return AppLocalizations.of(context)!.admin;
+      default:
+        return role;
+    }
   }
 
   void _showEditCaptionDialog() {
@@ -313,20 +408,20 @@ class _PostItemState extends State<PostItem> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text("Edit Caption"),
+        title: Text(AppLocalizations.of(context)!.edit_caption),
         content: TextFormField(
           initialValue: updatedCaption,
           maxLines: 3,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             border: OutlineInputBorder(),
-            labelText: "Edit your caption",
+            labelText: AppLocalizations.of(context)!.edit_your_caption,
           ),
           onChanged: (val) => updatedCaption = val,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text("Cancel"),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -343,8 +438,8 @@ class _PostItemState extends State<PostItem> {
               }
               Navigator.pop(ctx);
             },
-            child: const Text(
-              "Save",
+            child: Text(
+              AppLocalizations.of(context)!.save,
               style: TextStyle(color: Colors.white),
             ),
           ),
@@ -359,20 +454,20 @@ class _PostItemState extends State<PostItem> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text("Edit Reply"),
+        title: Text(AppLocalizations.of(context)!.edit_reply),
         content: TextFormField(
           initialValue: updatedMessage,
           maxLines: 3,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             border: OutlineInputBorder(),
-            labelText: "Edit your reply",
+            labelText: AppLocalizations.of(context)!.edit_your_reply,
           ),
           onChanged: (val) => updatedMessage = val,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text("Cancel"),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -396,8 +491,8 @@ class _PostItemState extends State<PostItem> {
               }
               Navigator.pop(ctx);
             },
-            child: const Text(
-              "Save",
+            child: Text(
+              AppLocalizations.of(context)!.save,
               style: TextStyle(color: Colors.white),
             ),
           ),
@@ -420,14 +515,15 @@ class _PostItemState extends State<PostItem> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text("Write your reply",
+              Text(AppLocalizations.of(context)!.write_reply,
                   style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 12),
               TextField(
                 maxLines: 3,
                 onChanged: (val) => replyText = val,
-                decoration: const InputDecoration(
-                  hintText: "Type your reply here...",
+                decoration: InputDecoration(
+                  hintText:
+                      "${AppLocalizations.of(context)!.type_reply_here} . . .",
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -449,7 +545,6 @@ class _PostItemState extends State<PostItem> {
                             sl<SharedPreferences>().getString("userid") ?? "",
                         questionId: widget.post.id,
                         createdAt: DateTime.now()));
-                    showAllReplies = true;
                     Navigator.pop(ctx);
                   }
                 },
@@ -457,8 +552,8 @@ class _PostItemState extends State<PostItem> {
                   Icons.send,
                   color: Colors.white,
                 ),
-                label: const Text(
-                  "Submit Reply",
+                label: Text(
+                  AppLocalizations.of(context)!.submit_reply,
                   style: TextStyle(color: Colors.white),
                 ),
               ),

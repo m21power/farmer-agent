@@ -17,6 +17,7 @@ class _SignupPageState extends State<SignupPage> {
   final emailController = TextEditingController();
   final phoneController = TextEditingController();
   final passwordController = TextEditingController();
+  String? role;
 
   bool isLoading = false;
   bool isPasswordVisible = false;
@@ -138,8 +139,10 @@ class _SignupPageState extends State<SignupPage> {
                             border: OutlineInputBorder(),
                           ),
                           validator: (value) {
-                            if (value == null ||
-                                !RegExp(r'^09\d{8}$').hasMatch(value)) {
+                            if (value == null || value.isEmpty) {
+                              return "Phone number is required";
+                            }
+                            if (!RegExp(r'^09\d{8}$').hasMatch(value)) {
                               return 'Enter valid phone number';
                             }
                             return null;
@@ -167,12 +170,56 @@ class _SignupPageState extends State<SignupPage> {
                             ),
                           ),
                           validator: (value) {
-                            if (value == null || value.length < 8)
-                              return 'Password too short';
+                            if (value == null || value.isEmpty) {
+                              return 'Password is required';
+                            }
+
+                            if (value.contains(' ')) {
+                              return 'Password cannot contain spaces';
+                            }
+
+                            if (value.length < 8) {
+                              return 'Password must be at least 8 characters long';
+                            }
+
+                            final pattern =
+                                r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#\$&*~])[A-Za-z\d!@#\$&*~]{8,}$';
+
+                            if (!RegExp(pattern).hasMatch(value)) {
+                              return 'Password must include uppercase,lowercase,\nnumber,and special character';
+                            }
+
                             return null;
                           },
                         ),
                         SizedBox(height: 25),
+                        DropdownButtonFormField<String>(
+                          decoration: InputDecoration(
+                            labelText: 'Role',
+                            border: OutlineInputBorder(),
+                          ),
+                          items: [
+                            DropdownMenuItem(
+                              value: 'expert',
+                              child: Text('Expert'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'farmer',
+                              child: Text('Farmer'),
+                            ),
+                          ],
+                          onChanged: (value) {
+                            setState(() {
+                              role = value;
+                            });
+                          },
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please select a role';
+                            }
+                            return null;
+                          },
+                        ),
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
@@ -192,7 +239,7 @@ class _SignupPageState extends State<SignupPage> {
                                                   password:
                                                       passwordController.text,
                                                   email: email,
-                                                  role: "admin")));
+                                                  role: role ?? 'farmer')));
                                     }
                                   },
                             style: ElevatedButton.styleFrom(

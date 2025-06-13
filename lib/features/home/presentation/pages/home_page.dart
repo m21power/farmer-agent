@@ -8,11 +8,13 @@ import 'package:maize_guard/features/community/presentation/bloc/community_bloc.
 import 'package:maize_guard/features/help/presentation/pages/help_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../../l10n/bloc/lang_bloc.dart';
 import '../../../Resource/presentation/pages/resource_page.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../community/presentation/pages/community_page.dart';
 import '../../../help/presentation/pages/history_page.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -57,10 +59,10 @@ class _HomePageState extends State<HomePage> {
 
           _pages = [
             ProfilePage(user: userData),
-            HelpPage(),
+            // HelpPage(),
             CommunityPage(),
-            HistoryPage(),
-            ResourcePage(),
+            // HistoryPage(),
+            // ResourcePage(),
           ];
         });
       } else {
@@ -91,6 +93,32 @@ class _HomePageState extends State<HomePage> {
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
+            actions: [
+              BlocBuilder<LangBloc, LangState>(
+                builder: (context, langState) {
+                  return PopupMenuButton<String>(
+                    icon: const Icon(Icons.language, color: Colors.white),
+                    onSelected: (value) {
+                      var langCode =
+                          value == AppLocalizations.of(context)!.amharic
+                              ? "am"
+                              : "en";
+                      context.read<LangBloc>().add(ChangeLangEvent(langCode));
+                    },
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: AppLocalizations.of(context)!.english,
+                        child: Text(AppLocalizations.of(context)!.english),
+                      ),
+                      PopupMenuItem(
+                        value: AppLocalizations.of(context)!.amharic,
+                        child: Text(AppLocalizations.of(context)!.amharic),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
             title: const Text(
               'Maize Guard',
               style: TextStyle(
@@ -128,17 +156,9 @@ class _HomePageState extends State<HomePage> {
                 ),
                 ListTile(
                   leading: const Icon(Icons.person, color: Colors.green),
-                  title: const Text('Profile'),
+                  title: Text(AppLocalizations.of(context)!.profile),
                   onTap: () {
                     setState(() => _currentIndex = 0);
-                    Navigator.pop(context);
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.help, color: Colors.green),
-                  title: const Text('Ask'),
-                  onTap: () {
-                    setState(() => _currentIndex = 1);
                     Navigator.pop(context);
                   },
                 ),
@@ -149,42 +169,28 @@ class _HomePageState extends State<HomePage> {
                         ? Colors.red
                         : Colors.green,
                   ),
-                  title: const Text('Community'),
+                  title: Text(AppLocalizations.of(context)!.community),
                   onTap: () {
                     setState(() => _currentIndex = 2);
-                    Navigator.pop(context);
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.history, color: Colors.green),
-                  title: const Text('History'),
-                  onTap: () {
-                    setState(() => _currentIndex = 3);
-                    Navigator.pop(context);
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.school, color: Colors.green),
-                  title: const Text('Educational Resources'),
-                  onTap: () {
-                    setState(() => _currentIndex = 4);
                     Navigator.pop(context);
                   },
                 ),
                 const Divider(),
                 ListTile(
                   leading: const Icon(Icons.logout, color: Colors.green),
-                  title: const Text('Logout'),
+                  title: Text(AppLocalizations.of(context)!.logout),
                   onTap: () async {
                     showDialog(
                       context: context,
                       builder: (context) => AlertDialog(
-                        title: Text("Confirm Logout"),
-                        content: Text("Are you sure you want to log out?"),
+                        title:
+                            Text(AppLocalizations.of(context)!.confirm_logout),
+                        content: Text(AppLocalizations.of(context)!
+                            .are_you_sure_you_want_to_logout),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(),
-                            child: Text("Cancel"),
+                            child: Text(AppLocalizations.of(context)!.cancel),
                           ),
                           TextButton(
                             onPressed: () {
@@ -196,7 +202,7 @@ class _HomePageState extends State<HomePage> {
                                   const Color.fromARGB(255, 23, 165, 28),
                             ),
                             child: Text(
-                              "Logout",
+                              AppLocalizations.of(context)!.logout,
                               style: TextStyle(
                                 color: Colors.white,
                               ),
